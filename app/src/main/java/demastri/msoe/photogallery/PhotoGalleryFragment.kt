@@ -8,12 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import demastri.msoe.photogallery.api.FlickrApi
 import demastri.msoe.photogallery.databinding.FragmentPhotoGalleryBinding
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.create
 
 private const val TAG = "PhotoGalleryFragment"
 
