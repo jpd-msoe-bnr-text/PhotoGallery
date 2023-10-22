@@ -1,5 +1,6 @@
 package demastri.msoe.photogallery
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -62,7 +63,12 @@ class PhotoGalleryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 photoGalleryViewModel.uiState.collect { state ->
-                    binding.photoGrid.adapter = PhotoListAdapter(state.images)
+                    binding.photoGrid.adapter = PhotoListAdapter(
+                        state.images
+                    ) { photoPageUri ->
+                        val intent = Intent(Intent.ACTION_VIEW, photoPageUri)
+                        startActivity(intent)
+                    }
                     searchView?.setQuery(state.query, false)
                     updatePollingState(state.isPolling)
                 }
@@ -103,10 +109,12 @@ class PhotoGalleryFragment : Fragment() {
                 photoGalleryViewModel.setQuery("")
                 true
             }
+
             R.id.menu_item_toggle_polling -> {
                 photoGalleryViewModel.toggleIsPolling()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -125,18 +133,19 @@ class PhotoGalleryFragment : Fragment() {
         }
         pollingMenuItem?.setTitle(toggleItemTitle)
 
-        if( isPolling) {
+        if (isPolling) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.UNMETERED)
                 .build()
             val periodicRequest =
                 PeriodicWorkRequestBuilder<PollWorker>(15, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build()
+                    .setConstraints(constraints)
+                    .build()
             WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(
-                    POLL_WORK,
+                POLL_WORK,
                 ExistingPeriodicWorkPolicy.KEEP,
-                periodicRequest)
+                periodicRequest
+            )
         } else {
             WorkManager.getInstance(requireContext()).cancelUniqueWork(POLL_WORK)
         }
